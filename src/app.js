@@ -7,10 +7,10 @@ require('dotenv')
     .config()
 
 const adminRouter = require('./routes/admin')
+const errorRouter = require('./routes/error')
 
-const {setLocalVariables} = require("./util/locals")
-const {setSession} = require("./util/session")
-const {get404, render500} = require('../src/controllers/error')
+const {setLocalVariables} = require("./utils/locals")
+const {setSession} = require("./utils/session")
 
 const app = express()
 
@@ -27,9 +27,7 @@ app.use(flash())
 app.use(setLocalVariables)
 
 app.use('/admin', adminRouter)
-
-app.use(get404)
-app.use(render500)
+app.use(errorRouter)
 
 mongoose
     .connect(process.env.MONGO_URL)
