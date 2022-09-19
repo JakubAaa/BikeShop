@@ -10,6 +10,7 @@ const adminRouter = require('./routes/admin')
 
 const {setLocalVariables} = require("./util/locals")
 const {setSession} = require("./util/session")
+const {get404, render500} = require('../src/controllers/error')
 
 const app = express()
 
@@ -26,6 +27,9 @@ app.use(flash())
 app.use(setLocalVariables)
 
 app.use('/admin', adminRouter)
+
+app.use(get404)
+app.use(render500)
 
 mongoose
     .connect(process.env.MONGO_URL)
