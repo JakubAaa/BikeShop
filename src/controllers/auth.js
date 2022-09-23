@@ -49,7 +49,7 @@ exports.postLogin = async (req, res) => {
         })
     }
 
-    const user = await User.findOne({email: email})
+    const user = await User.findOne({email})
     if(!user){
         return res.status(422).render('auth/login', {
             path: '/login',

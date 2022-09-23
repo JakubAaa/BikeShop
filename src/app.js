@@ -9,6 +9,7 @@ require('dotenv')
 
 const authRouter = require('./routes/auth')
 const adminRouter = require('./routes/admin')
+const userRouter = require('./routes/user')
 const errorRouter = require('./routes/error')
 
 const {setLocalVariables} = require("./utils/locals")
@@ -40,6 +41,7 @@ app.use(setLocalVariables)
 
 app.use('/admin', adminRouter)
 app.use(authRouter)
+app.use(userRouter)
 app.use(errorRouter)
 
 app.use((error, req, res, next) =>

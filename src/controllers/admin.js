@@ -15,7 +15,8 @@ exports.getProducts = async (req, res) => {
         return throwError404(res)
 
     res.status(200)
-        .render('admin/products', {
+        .render('user/products', {
+            adminView: true,
             pageTitle: 'Products',
             path: '/admin/products',
             products: productsOnPage,

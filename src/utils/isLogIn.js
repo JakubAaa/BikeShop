@@ -3,7 +3,7 @@ const {throwError404} = require("./error-handler");
 
 exports.checkIsLogIn = async (req, res, next) => {
     if(!req.session.user)
-        next()
+        return next()
 
     const user = await User.findById(req.session.user._id)
     if(!user)

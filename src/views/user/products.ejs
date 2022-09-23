@@ -3,7 +3,11 @@
 <link rel="stylesheet" href="/css/forms.css">
 </head>
 <body>
-<%- include('../includes/admin-navigation.ejs') %>
+<% if(adminView) { %>
+    <%- include('../includes/admin-navigation.ejs') %>
+<% } else {%>
+    <%- include('../includes/user-navigation.ejs') %>
+<% } %>
 <main>
     <% if(products.length > 0) { %>
         <div class="grid">
@@ -23,10 +27,15 @@
                         </h2>
                     </div>
                     <div class="card__actions">
-                        <a href="/admin/edit-item/<%= product._id %>" class="btn">Edit</a>
-                        <input type="hidden" value="<%= product._id %>" name="prodId">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
+                        <% if(adminView) { %>
+                            <a href="/admin/edit-item/<%= product._id %>" class="btn">Edit</a>
+                            <input type="hidden" value="<%= product._id %>" name="prodId">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>
+                        <% } else {%>
+                            <a href="/products/<%= product._id %>" class="btn">Details</a>
+                            <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                        <% } %>
                     </div>
                 </article>
             <% } %>
