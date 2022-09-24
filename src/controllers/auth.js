@@ -137,7 +137,7 @@ exports.postSignup = async (req, res) => {
         email: email,
         password: hashedPassword,
         isAdmin: false,
-        cart: []
+        cart: {items: []}
     })
     await user.save()
 

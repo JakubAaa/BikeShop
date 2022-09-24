@@ -15,11 +15,11 @@ const errorRouter = require('./routes/error')
 const {setLocalVariables} = require("./utils/locals")
 const {setSession} = require("./utils/session")
 const {checkIsLogIn} = require("./utils/isLogIn")
-const {renderError500} = require("./utils/error-handler");
-const {setMulter} = require("./utils/multer");
+const {renderError500} = require("./utils/error-handler")
+const {setMulter} = require("./utils/multer")
 
 const app = express()
-const csrfProtection = csrf();
+const csrfProtection = csrf()
 
 app.set('views', 'src/views')
 app.set('view engine', 'ejs')
@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(setMulter)
 
 app.use(express.static(path.join(__dirname, 'public')))
-app.use('/images', express.static(path.join(__dirname, 'images')))
+app.use('/src/images', express.static(path.join(__dirname, 'images')))
 
 app.use(setSession)
 

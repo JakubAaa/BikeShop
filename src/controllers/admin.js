@@ -3,6 +3,7 @@ const {validationResult} = require('express-validator')
 const Product = require('../models/product')
 const Order = require('../models/order')
 const {throwError404} = require('../utils/error-handler')
+const {deleteFile} = require('../utils/files')
 
 exports.getProducts = async (req, res) => {
     const page = +req.query.page || 1
@@ -55,11 +56,11 @@ exports.getAddProduct = (req, res) => {
 }
 
 exports.postAddProduct = async (req, res) => {
-    const name = req.body.name;
-    const category = req.body.category;
-    const image = req.file;
-    const price = req.body.price;
-    const description = req.body.description;
+    const name = req.body.name
+    const category = req.body.category
+    const image = req.file
+    const price = req.body.price
+    const description = req.body.description
 
     if (!image) {
         return res.status(422)
@@ -78,10 +79,10 @@ exports.postAddProduct = async (req, res) => {
             });
     }
 
-    const imageUrl = image.path;
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
+        deleteFile(image.path)
         return res.status(422)
             .render('admin/edit-item', {
                 pageTitle: 'Add Product',
@@ -102,7 +103,7 @@ exports.postAddProduct = async (req, res) => {
     const product = new Product({
         name: name,
         category: category,
-        imageUrl: imageUrl,
+        imageUrl: image.path,
         price: price,
         description: description,
         userId: req.user
@@ -110,5 +111,5 @@ exports.postAddProduct = async (req, res) => {
     await product.save()
 
     return res.status(201)
-        .redirect('/admin/product')
+        .redirect('/admin/products')
 }
