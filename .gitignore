@@ -3,5 +3,5 @@ node_modules
 dist
 .env
 *.iml
-src/images
-src/data/invoices
+*src/images
+*src/data/invoices
