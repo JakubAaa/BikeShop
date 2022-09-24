@@ -1,11 +1,13 @@
 const path = require("path")
 const fs = require("fs")
 const PDFDocument = require('pdfkit')
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 const Product = require("../models/product")
 const Order = require("../models/order")
 
 const {throwError404, throwError403} = require("../utils/error-handler")
+const {setPrices} = require('../utils/payments')
 
 exports.getIndex = (req, res) => {
     res.status(200)
@@ -107,39 +109,25 @@ exports.postAddToCart = async (req, res) => {
     const prodId = req.body.prodId
     const product = await Product.findById(prodId)
     await req.user.addToCart(product)
-    res.status(201).redirect('/cart')
+    res.status(201)
+        .redirect('/cart')
 }
 
 exports.postDeleteFromCart = async (req, res) => {
     const prodId = req.body.prodId
     await req.user.deleteFromCart(prodId)
-    res.status(200).redirect('/cart')
-}
-
-exports.postCreateOrder = async (req, res) => {
-    const user = await req.user.populate('cart.items.productId')
-    const products = user.cart.items.map(i => {
-        return {quantity: i.quantity, product: {...i.productId._doc}}
-    })
-    const order = new Order({
-        user: {
-            email: user.email,
-            userId: user
-        },
-        products: products
-    })
-    await order.save()
-    await user.clearCart()
-    res.status(201).redirect('/orders')
+    res.status(200)
+        .redirect('/cart')
 }
 
 exports.getOrders = async (req, res) => {
     const orders = await Order.find({'user.userId': req.user._id})
-    res.status(200).render('user/orders', {
-        pageTitle: 'Orders',
-        path: '/orders',
-        orders: orders
-    })
+    res.status(200)
+        .render('user/orders', {
+            pageTitle: 'Orders',
+            path: '/orders',
+            orders: orders
+        })
 }
 
 exports.getInvoice = async (req, res) => {
@@ -179,3 +167,33 @@ exports.getInvoice = async (req, res) => {
 
     pdfDoc.end()
 }
+
+exports.getCheckout = async (req, res) => {
+    const user = await req.user.populate('cart.items.productId')
+    let products = user.cart.items
+    let total = 0
+    products.forEach(p => total += p.quantity * p.productId.price)
+
+    const session = await stripe.checkout.sessions.create({
+        line_items: await setPrices(products),
+        mode: 'payment',
+        success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
+        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+    })
+
+    res.status(200)
+        .render('user/checkout', {
+            path: '/checkout',
+            pageTitle: 'Checkout',
+            products: products,
+            totalSum: total,
+            sessionId: session.id
+        })
+}
+
+exports.getCheckoutSuccess = (req, res) => {
+
+}
+
+
+

@@ -25,10 +25,14 @@ router.post('/add-to-cart', userController.postAddToCart)
 
 router.post('/delete-from-cart', userController.postDeleteFromCart)
 
-router.post('/create-order', userController.postCreateOrder)
-
 router.get('/orders', userController.getOrders)
 
 router.get('/orders/:orderId', userController.getInvoice)
+
+router.get('/checkout', userController.getCheckout)
+
+router.get('/checkout/success', userController.getCheckoutSuccess)
+
+router.get('/checkout/cancel', userController.getCheckout)
 
 module.exports = router;
