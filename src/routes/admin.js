@@ -29,4 +29,10 @@ router.get('/add-product', adminController.getAddProduct)
 
 router.post('/add-product', productValidation, adminController.postAddProduct)
 
+router.get('/edit-product/:prodId', adminController.getEditProduct)
+
+router.post('/edit-product', productValidation, adminController.postEditProduct)
+
+router.post('/delete-product', adminController.postDeleteProduct)
+
 module.exports = router

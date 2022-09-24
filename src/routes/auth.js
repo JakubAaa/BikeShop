@@ -56,4 +56,28 @@ router.post(
 
 router.post('/logout', authController.postLogout)
 
+router.get('/reset', authController.getReset)
+
+router.post(
+    '/reset',
+    [
+        body('email', 'Please enter a valid email')
+            .isEmail()
+            .normalizeEmail()
+    ],
+    authController.postReset
+)
+
+router.get('/reset/:token', authController.getNewPassword)
+
+router.post(
+    '/new-password',
+    [
+        body('password', 'Please enter a valid password with at least 5 characters')
+            .isString()
+            .isLength({min: 5})
+            .trim()
+    ],
+    authController.postNewPassword)
+
 module.exports = router

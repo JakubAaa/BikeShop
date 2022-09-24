@@ -45,7 +45,7 @@ exports.getOrders = async (req, res) => {
 
 exports.getAddProduct = (req, res) => {
     res.status(200)
-        .render('admin/edit-item', {
+        .render('admin/edit-product', {
             pageTitle: 'Add Product',
             path: '/admin/add-product',
             editing: false,
@@ -64,7 +64,7 @@ exports.postAddProduct = async (req, res) => {
 
     if (!image) {
         return res.status(422)
-            .render('admin/edit-item', {
+            .render('admin/edit-product', {
                 pageTitle: 'Add Product',
                 path: '/admin/add-product',
                 editing: false,
@@ -80,11 +80,10 @@ exports.postAddProduct = async (req, res) => {
     }
 
     const errors = validationResult(req)
-
     if (!errors.isEmpty()) {
         deleteFile(image.path)
         return res.status(422)
-            .render('admin/edit-item', {
+            .render('admin/edit-product', {
                 pageTitle: 'Add Product',
                 path: '/admin/add-product',
                 editing: false,
@@ -111,5 +110,75 @@ exports.postAddProduct = async (req, res) => {
     await product.save()
 
     return res.status(201)
+        .redirect('/admin/products')
+}
+
+exports.getEditProduct = async (req, res) => {
+    const prodId = req.params.prodId
+    const product = await Product.findById(prodId)
+    if (!product)
+        return throwError404(res)
+
+    res.status(200)
+        .render('admin/edit-product', {
+            pageTitle: 'Edit Item',
+            path: '/admin/edit-item',
+            editing: true,
+            product: product,
+            errorMessage: null,
+            hasError: false,
+            validationErrors: []
+        })
+}
+
+exports.postEditProduct = async (req, res) => {
+    const prodId = req.body.productId
+    const updatedName = req.body.name
+    const image = req.file
+    const updatedPrice = req.body.price
+    const updatedDescription = req.body.description
+
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(422)
+            .render('admin/edit-product', {
+                pageTitle: 'Edit Product',
+                path: '/admin/edit-product',
+                editing: true,
+                hasError: true,
+                product: {
+                    name: updatedName,
+                    category: req.body.category,
+                    price: updatedPrice,
+                    description: updatedDescription,
+                    _id: prodId
+                },
+                errorMessage: errors.array()[0].msg,
+                validationErrors: errors.array()
+            });
+    }
+
+    const product = await Product.findById(prodId)
+    product.name = updatedName
+    product.price = updatedPrice
+    product.description = updatedDescription
+    if (image) {
+        deleteFile(product.imageUrl)
+        product.imageUrl = image.path
+    }
+    await product.save()
+    res.status(201)
+        .redirect('/admin/products')
+}
+
+exports.postDeleteProduct = async (req, res) => {
+    const prodId = req.body.productId
+    const product = await Product.findById(prodId)
+    if (!product)
+        return throwError404(res)
+
+    deleteFile(product.imageUrl)
+    await Product.deleteOne({_id: prodId})
+    res.status(200)
         .redirect('/admin/products')
 }

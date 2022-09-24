@@ -8,10 +8,11 @@ const Order = require("../models/order")
 const {throwError404, throwError403} = require("../utils/error-handler")
 
 exports.getIndex = (req, res) => {
-    res.render('user/index', {
-        pageTitle: 'Main',
-        path: '/'
-    })
+    res.status(200)
+        .render('user/index', {
+            pageTitle: 'Main',
+            path: '/'
+        })
 }
 
 exports.getProducts = async (req, res) => {
@@ -40,10 +41,11 @@ exports.getProducts = async (req, res) => {
 }
 
 exports.getProductsCategories = (req, res) => {
-    res.render('user/categories', {
-        pageTitle: 'Categories',
-        path: '/products'
-    })
+    res.status(200)
+        .render('user/categories', {
+            pageTitle: 'Categories',
+            path: '/products'
+        })
 }
 
 exports.getProductsByCategory = async (req, res) => {
@@ -75,40 +77,43 @@ exports.getProductsByCategory = async (req, res) => {
 exports.getProductById = async (req, res) => {
     const prodId = req.params.prodId
     const product = await Product.findById(prodId)
-    res.render('user/product-details', {
-        pageTitle: 'Details',
-        path: '/products',
-        product: product
-    })
+    res.status(200)
+        .render('user/product-details', {
+            pageTitle: 'Details',
+            path: '/products',
+            product: product
+        })
 }
 
 exports.getContact = (req, res) => {
-    res.render('user/contact', {
-        pageTitle: 'Contact',
-        path: '/contact'
-    })
+    res.status(200)
+        .render('user/contact', {
+            pageTitle: 'Contact',
+            path: '/contact'
+        })
 }
 
 exports.getCart = async (req, res) => {
     const user = await req.user.populate('cart.items.productId')
-    res.render('user/cart', {
-        pageTitle: 'Cart',
-        path: '/cart',
-        products: user.cart.items
-    })
+    res.status(200)
+        .render('user/cart', {
+            pageTitle: 'Cart',
+            path: '/cart',
+            products: user.cart.items
+        })
 }
 
 exports.postAddToCart = async (req, res) => {
     const prodId = req.body.prodId
     const product = await Product.findById(prodId)
     await req.user.addToCart(product)
-    res.redirect('/cart')
+    res.status(201).redirect('/cart')
 }
 
 exports.postDeleteFromCart = async (req, res) => {
     const prodId = req.body.prodId
     await req.user.deleteFromCart(prodId)
-    res.redirect('/cart')
+    res.status(200).redirect('/cart')
 }
 
 exports.postCreateOrder = async (req, res) => {
@@ -125,12 +130,12 @@ exports.postCreateOrder = async (req, res) => {
     })
     await order.save()
     await user.clearCart()
-    res.redirect('/orders')
+    res.status(201).redirect('/orders')
 }
 
-exports.getOrders = async (req, res) =>{
+exports.getOrders = async (req, res) => {
     const orders = await Order.find({'user.userId': req.user._id})
-    res.render('user/orders', {
+    res.status(200).render('user/orders', {
         pageTitle: 'Orders',
         path: '/orders',
         orders: orders
@@ -140,10 +145,10 @@ exports.getOrders = async (req, res) =>{
 exports.getInvoice = async (req, res) => {
     const orderId = req.params.orderId
     const order = await Order.findById(orderId)
-    if(!order)
+    if (!order)
         return throwError404(res)
 
-    if(order.user.userId.toString() !== req.user._id.toString())
+    if (order.user.userId.toString() !== req.user._id.toString())
         return throwError403(res)
 
     const invoiceName = 'invoice-' + orderId + '.pdf'
@@ -155,18 +160,22 @@ exports.getInvoice = async (req, res) => {
     pdfDoc.pipe(fs.createWriteStream(invoicePath))
     pdfDoc.pipe(res)
 
-    pdfDoc.fontSize(26).text('Invoice', {
-        underline: true
-    })
+    pdfDoc.fontSize(26)
+        .text('Invoice', {
+            underline: true
+        })
 
     let total = 0
     pdfDoc.text('------------------------------------------')
     order.products.forEach(prod => {
         total += prod.quantity * prod.product.price
-        pdfDoc.fontSize(14).text(prod.product.name + ' - ' + prod.quantity + ' x ' + prod.product.price + '$ = ' + prod.quantity * prod.product.price + '$')
+        pdfDoc.fontSize(14)
+            .text(
+                prod.product.name + ' - ' + prod.quantity + ' x ' + prod.product.price + '$ = ' + prod.quantity * prod.product.price + '$')
     })
     pdfDoc.text('--------------------------------')
-    pdfDoc.fontSize(20).text('Total: ' + total + '$')
+    pdfDoc.fontSize(20)
+        .text('Total: ' + total + '$')
 
     pdfDoc.end()
 }
