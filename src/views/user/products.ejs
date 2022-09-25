@@ -5,7 +5,7 @@
 <body>
 <% if(adminView) { %>
     <%- include('../includes/admin-navigation.ejs') %>
-<% } else {%>
+<% } else { %>
     <%- include('../includes/user-navigation.ejs') %>
 <% } %>
 <main>
@@ -34,7 +34,7 @@
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <button class="btn" type="submit">Delete</button>
                             </form>
-                        <% } else {%>
+                        <% } else { %>
                             <a href="/products/<%= product._id %>" class="btn">Details</a>
                             <%- include('../includes/add-to-cart.ejs', {product: product}) %>
                         <% } %>
@@ -44,7 +44,9 @@
         </div>
         <%- include('../includes/pagination.ejs', {currentPage, nextPage, previousPage, lastPage, hasNextPage, hasPreviousPage}) %>
     <% } else{ %>
-        <h1>No Products Found!</h1>
+        <h1 class="centered">
+            No Products Found!
+        </h1>
     <% } %>
 </main>
 

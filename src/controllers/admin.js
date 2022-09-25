@@ -33,7 +33,7 @@ exports.getProducts = async (req, res) => {
 exports.getOrders = async (req, res) => {
     const orders = await Order.find()
     if (!orders)
-        throwError404(res);
+        throwError404(res)
 
     res.status(200)
         .render('admin/orders', {

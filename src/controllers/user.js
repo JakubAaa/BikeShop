@@ -177,10 +177,9 @@ exports.getCheckout = async (req, res) => {
     const session = await stripe.checkout.sessions.create({
         line_items: await setPrices(products),
         mode: 'payment',
-        success_url: req.protocol + '://' + req.get('host') + '/checkout/success',
-        cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+        success_url: `${process.env.URL_DOMAIN}${process.env.PORT}/checkout/success`,
+        cancel_url: `${process.env.URL_DOMAIN}${process.env.PORT}/checkout/cancel`
     })
-
     res.status(200)
         .render('user/checkout', {
             path: '/checkout',
@@ -191,8 +190,22 @@ exports.getCheckout = async (req, res) => {
         })
 }
 
-exports.getCheckoutSuccess = (req, res) => {
-
+exports.getCheckoutSuccess = async (req, res) => {
+    const user = await req.user.populate('cart.items.productId')
+    const products = user.cart.items.map(i => {
+        return {quantity: i.quantity, product: {...i.productId._doc}}
+    })
+    const order = new Order({
+        user: {
+            email: user.email,
+            userId: user
+        },
+        products: products
+    })
+    await order.save()
+    await user.clearCart()
+    res.status(201)
+        .redirect('/orders')
 }
 
 
