@@ -3,14 +3,14 @@ const sinon = require('sinon')
 require('dotenv')
     .config()
 
-const adminController = require('../../src/controllers/admin')
+const userController = require('../../src/controllers/user')
 const Product = require('../../src/models/product')
-const {product2, insertOneProduct} = require("../utils/insertProduct")
+const {product2, product3, insertManyProducts} = require("../utils/insertProduct")
 
-describe('getEditProduct', () => {
+describe('getProductsByCategory', () => {
     beforeAll(async () => {
         await mongoose.connect(process.env.MONGO_URL)
-        await insertOneProduct(product2)
+        await insertManyProducts([product2, product3])
     })
 
     afterAll(async () => {
@@ -18,51 +18,54 @@ describe('getEditProduct', () => {
         await mongoose.disconnect(process.env.MONGO_URL)
     })
 
-    it('should render edit-product page with product properties', async () => {
+    it('should render page only with products with correct category', async () => {
         const req = {
             params: {
-                prodId: product2._id
-            }
+                category: product2.category
+            },
+            query: {}
         }
         const res = {
             render: jest.fn(),
             status: jest.fn()
                 .mockReturnThis()
         }
-        await adminController.getEditProduct(req, res)
+        await userController.getProductsByCategory(req, res)
 
         expect(res.status.mock.calls[0][0])
             .toBe(200)
 
+        expect(res.render.mock.calls[0][1].products.length)
+            .toBe(1)
+        expect(res.render.mock.calls[0][1].products[0]._id.toString())
+            .toStrictEqual(product2._id.toString())
+
         expect(res.render.mock.calls[0][0])
-            .toBe('admin/edit-product')
-        expect(res.render.mock.calls[0][1].editing)
-            .toBe(true)
-        expect(res.render.mock.calls[0][1].product.name)
-            .toStrictEqual(product2.name)
+            .toBe('user/products')
     })
 
     it('should throw 404 error - db failed', async () => {
-        sinon.stub(Product, 'findById')
-        Product.findById.returns(null)
+        sinon.stub(Product, 'find')
+        Product.find.returns(null)
 
         const req = {
             params: {
-                prodId: product2._id
-            }
+                category: product3.category
+            },
+            query: {}
         }
         const res = {
             redirect: jest.fn(),
             status: jest.fn()
                 .mockReturnThis()
         }
-        await adminController.getEditProduct(req, res)
+        await userController.getProductsByCategory(req, res)
 
         expect(res.status.mock.calls[0][0])
             .toBe(404)
         expect(res.redirect.mock.calls[0][0])
             .toBe('/404')
 
-        Product.findById.restore()
+        Product.find.restore()
     })
 })

@@ -1,4 +1,6 @@
 const {ObjectId} = require('mongodb')
+const User = require("../../src/models/user")
+
 const emails = {
     email1: 'test1@test.com',
     email2: 'test2@test.com',
@@ -15,8 +17,10 @@ const carts = {
     emptyCart: {},
     cart1: {items: [{productId: new ObjectId(), quantity: 1}]},
     cart2: {
-        items: [{productId: new ObjectId(), quantity: 1},
-            {productId: new ObjectId(), quantity: 3}]
+        items: [
+            {productId: new ObjectId(), quantity: 1},
+            {productId: new ObjectId(), quantity: 3}
+        ]
     }
 }
 
@@ -44,6 +48,13 @@ const user2 = {
     cart: carts.cart2
 }
 
+const insertOneUser = async user =>
+    await User.collection.insertOne(user)
+
+
+const insertManyUsers = async users =>
+    await User.collection.insertMany(users)
+
 exports.emails = emails
 exports.passwords = passwords
 exports.carts = carts
@@ -51,3 +62,6 @@ exports.carts = carts
 exports.adminUser = adminUser
 exports.user1 = user1
 exports.user2 = user2
+
+exports.insertOneUser = insertOneUser
+exports.insertMayUsers = insertManyUsers

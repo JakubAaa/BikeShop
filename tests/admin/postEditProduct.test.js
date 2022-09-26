@@ -5,15 +5,13 @@ require('dotenv')
 
 const adminController = require('../../src/controllers/admin')
 const Product = require('../../src/models/product')
-const {product2, product3, product4, images, names, prices, descriptions} = require("../utils/insertProduct")
+const {product2, product3, product4, images, names, prices, descriptions, insertManyProducts} = require("../utils/insertProduct")
 const {adminUser} = require('../utils/insertUser')
 
 describe('postEditProduct', () => {
     beforeAll(async () => {
         await mongoose.connect(process.env.MONGO_URL)
-        await Product.create(product2)
-        await Product.create(product3)
-        await Product.create(product4)
+        await insertManyProducts([product2, product3, product4])
     })
 
     afterAll(async () => {

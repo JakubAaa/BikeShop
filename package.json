@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand",
     "start": "nodemon src/app.js"
   },
   "repository": {
@@ -20,7 +20,6 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
-    "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^3.1.1",
     "crypto": "^1.0.1",
     "csurf": "^1.11.0",
@@ -29,7 +28,6 @@
     "express": "^4.18.1",
     "express-session": "^1.17.3",
     "express-validator": "^6.14.2",
-    "flash": "^1.1.0",
     "mongodb": "^4.10.0",
     "mongoose": "^6.6.1",
     "multer": "^1.4.5-lts.1",

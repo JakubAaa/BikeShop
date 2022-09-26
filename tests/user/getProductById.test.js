@@ -3,14 +3,14 @@ const sinon = require('sinon')
 require('dotenv')
     .config()
 
-const adminController = require('../../src/controllers/admin')
+const userController = require('../../src/controllers/user')
 const Product = require('../../src/models/product')
-const {product2, insertOneProduct} = require("../utils/insertProduct")
+const {product2, product3, insertManyProducts} = require("../utils/insertProduct")
 
-describe('getEditProduct', () => {
+describe('getProductById', () => {
     beforeAll(async () => {
         await mongoose.connect(process.env.MONGO_URL)
-        await insertOneProduct(product2)
+        await insertManyProducts([product2, product3])
     })
 
     afterAll(async () => {
@@ -18,10 +18,10 @@ describe('getEditProduct', () => {
         await mongoose.disconnect(process.env.MONGO_URL)
     })
 
-    it('should render edit-product page with product properties', async () => {
+    it('should render page with 2 products', async () => {
         const req = {
             params: {
-                prodId: product2._id
+                prodId: product2._id.toString()
             }
         }
         const res = {
@@ -29,17 +29,16 @@ describe('getEditProduct', () => {
             status: jest.fn()
                 .mockReturnThis()
         }
-        await adminController.getEditProduct(req, res)
+        await userController.getProductById(req, res)
 
         expect(res.status.mock.calls[0][0])
             .toBe(200)
 
+        expect(res.render.mock.calls[0][1].product._id.toString())
+            .toStrictEqual(product2._id.toString())
+
         expect(res.render.mock.calls[0][0])
-            .toBe('admin/edit-product')
-        expect(res.render.mock.calls[0][1].editing)
-            .toBe(true)
-        expect(res.render.mock.calls[0][1].product.name)
-            .toStrictEqual(product2.name)
+            .toBe('user/product-details')
     })
 
     it('should throw 404 error - db failed', async () => {
@@ -48,7 +47,7 @@ describe('getEditProduct', () => {
 
         const req = {
             params: {
-                prodId: product2._id
+                prodId: product3._id.toString()
             }
         }
         const res = {
@@ -56,7 +55,7 @@ describe('getEditProduct', () => {
             status: jest.fn()
                 .mockReturnThis()
         }
-        await adminController.getEditProduct(req, res)
+        await userController.getProductById(req, res)
 
         expect(res.status.mock.calls[0][0])
             .toBe(404)

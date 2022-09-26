@@ -5,13 +5,12 @@ require('dotenv')
 
 const adminController = require('../../src/controllers/admin')
 const Order = require('../../src/models/order')
-const {order1, order2} = require("../utils/insertOrder")
+const {order1, order2, insertManyOrders} = require("../utils/insertOrder")
 
 describe('getOrders', () => {
     beforeAll(async () => {
         await mongoose.connect(process.env.MONGO_URL)
-        await Order.create(order1)
-        await Order.create(order2)
+        await insertManyOrders([order1, order2])
     })
 
     afterAll(async () => {

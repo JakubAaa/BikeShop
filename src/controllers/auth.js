@@ -153,17 +153,11 @@ exports.postLogout = (req, res) => {
 }
 
 exports.getReset = (req, res) => {
-    let message = req.flash('error')
-    if (message.length > 0)
-        message = message[0]
-    else
-        message = null
-
     res.status(200)
         .render('auth/reset', {
             path: '/path',
             pageTitle: 'Reset Password',
-            errorMessage: message
+            errorMessage: null
         })
 }
 
@@ -174,9 +168,13 @@ exports.postReset = async (req, res) => {
 
     const user = await User.findOne({email})
     if (!user) {
-        req.flash('error', 'No account with that email found!')
-        return res.redirect('/reset')
+        return res.status(422).render('auth/reset', {
+            path: '/path',
+            pageTitle: 'Reset Password',
+            errorMessage: 'No account with that email found!'
+        })
     }
+
     user.resetToken = token
     user.resetTokenExpiration = Date.now() + HOUR
     await user.save()

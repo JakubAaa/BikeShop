@@ -19,13 +19,14 @@ exports.getIndex = (req, res) => {
 
 exports.getProducts = async (req, res) => {
     const page = +req.query.page || 1
-    const productsNumber = await Product.find()
-        .countDocuments()
+    const products = await Product.find()
+    if (!products)
+        return throwError404(res)
+
+    const productsNumber = products.length
     const productsOnPage = await Product.find()
         .skip((page - 1) * process.env.PRODUCTS_PER_PAGE_ADMIN)
         .limit(process.env.PRODUCTS_PER_PAGE_ADMIN)
-    if (!productsOnPage)
-        return throwError404(res)
 
     res.status(200)
         .render('user/products', {
@@ -53,13 +54,14 @@ exports.getProductsCategories = (req, res) => {
 exports.getProductsByCategory = async (req, res) => {
     const category = req.params.category
     const page = +req.query.page || 1
-    const productsNumber = await Product.find({category})
-        .countDocuments()
-    const productsOnPage = await Product.find({category})
-        .skip((page - 1) * process.env.PRODUCTS_PER_PAGE)
-        .limit(process.env.PRODUCTS_PER_PAGE)
-    if (!productsOnPage)
+    const products = await Product.find({category})
+    if (!products)
         return throwError404(res)
+
+    const productsNumber = products.length
+    const productsOnPage = await Product.find({category})
+        .skip((page - 1) * process.env.PRODUCTS_PER_PAGE_ADMIN)
+        .limit(process.env.PRODUCTS_PER_PAGE_ADMIN)
 
     res.status(200)
         .render('user/products', {
@@ -79,6 +81,9 @@ exports.getProductsByCategory = async (req, res) => {
 exports.getProductById = async (req, res) => {
     const prodId = req.params.prodId
     const product = await Product.findById(prodId)
+    if(!product)
+        return throwError404(res)
+
     res.status(200)
         .render('user/product-details', {
             pageTitle: 'Details',

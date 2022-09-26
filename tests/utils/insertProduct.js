@@ -1,4 +1,6 @@
 const {ObjectId} = require('mongodb')
+const Product = require("../../src/models/product")
+const {adminUser} = require("./insertUser")
 
 const names = {
     name1: 'Canyon',
@@ -49,7 +51,7 @@ const product2 = {
     imageUrl: images.image2.path,
     price: prices.price2,
     description: descriptions.description2,
-    userId: new ObjectId()
+    userId: adminUser._id
 }
 
 const product3 = {
@@ -59,7 +61,7 @@ const product3 = {
     imageUrl: images.image3.path,
     price: prices.price3,
     description: descriptions.description3,
-    userId: new ObjectId()
+    userId: adminUser._id
 }
 
 const product4 = {
@@ -69,8 +71,15 @@ const product4 = {
     imageUrl: images.image3.path,
     price: prices.price4,
     description: descriptions.description4,
-    userId: new ObjectId()
+    userId: adminUser._id
 }
+
+const insertOneProduct = async product =>
+    await Product.collection.insertOne(product)
+
+
+const insertManyProducts = async products =>
+    await Product.collection.insertMany(products)
 
 exports.names = names
 exports.categories = categories
@@ -82,3 +91,6 @@ exports.product1 = product1
 exports.product2 = product2
 exports.product3 = product3
 exports.product4 = product4
+
+exports.insertOneProduct = insertOneProduct
+exports.insertManyProducts = insertManyProducts
