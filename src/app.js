@@ -47,7 +47,6 @@ app.use(errorRouter)
 app.use((error, req, res, next) =>
     renderError500(req, res))
 
-
 mongoose
     .connect(process.env.MONGO_URL)
     .then(() => {

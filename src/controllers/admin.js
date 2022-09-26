@@ -7,13 +7,14 @@ const {deleteFile} = require('../utils/files')
 
 exports.getProducts = async (req, res) => {
     const page = +req.query.page || 1
-    const productsNumber = await Product.find()
-        .countDocuments()
+    const products = await Product.find()
+    if (!products)
+        return throwError404(res)
+
+    const productsNumber = products.length
     const productsOnPage = await Product.find()
         .skip((page - 1) * process.env.PRODUCTS_PER_PAGE_ADMIN)
         .limit(process.env.PRODUCTS_PER_PAGE_ADMIN)
-    if (!productsOnPage)
-        return throwError404(res)
 
     res.status(200)
         .render('user/products', {
@@ -33,7 +34,7 @@ exports.getProducts = async (req, res) => {
 exports.getOrders = async (req, res) => {
     const orders = await Order.find()
     if (!orders)
-        throwError404(res)
+        return throwError404(res)
 
     res.status(200)
         .render('admin/orders', {
@@ -109,8 +110,7 @@ exports.postAddProduct = async (req, res) => {
     })
     await product.save()
 
-    return res.status(201)
-        .redirect('/admin/products')
+    res.status(201).redirect('/admin/products')
 }
 
 exports.getEditProduct = async (req, res) => {
@@ -159,6 +159,9 @@ exports.postEditProduct = async (req, res) => {
     }
 
     const product = await Product.findById(prodId)
+    if(!product)
+        return throwError404(res)
+
     product.name = updatedName
     product.price = updatedPrice
     product.description = updatedDescription
