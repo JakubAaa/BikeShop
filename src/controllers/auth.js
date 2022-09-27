@@ -15,16 +15,17 @@ const transporter = nodemailer.createTransport(sendGridTransport({
 }))
 
 exports.getLogin = (req, res) => {
-    res.render('auth/login', {
-        pageTitle: 'Login',
-        path: '/login',
-        errorMessage: null,
-        oldInput: {
-            email: '',
-            password: ''
-        },
-        validationErrors: []
-    })
+    res.status(200)
+        .render('auth/login', {
+            pageTitle: 'Login',
+            path: '/login',
+            errorMessage: null,
+            oldInput: {
+                email: '',
+                password: ''
+            },
+            validationErrors: []
+        })
 }
 
 exports.postLogin = async (req, res) => {
@@ -79,29 +80,31 @@ exports.postLogin = async (req, res) => {
     req.session.isLoggedIn = true;
     req.session.isAdmin = user.isAdmin;
     req.session.user = user;
-    return req.session.save(() => {
-        if (user.isAdmin) {
-            res.redirect('/admin/products')
-        } else {
-            res.status(201)
-                .redirect('/')
-        }
-    })
+    await req.session.save()
+
+    if (user.isAdmin)
+        return res.status(201)
+            .redirect('/admin/products')
+
+    res.status(201)
+        .redirect('/')
+
 }
 
 exports.getSignup = (req, res) => {
-    res.render('auth/signup', {
-        pageTitle: 'Signup',
-        path: '/signup',
-        errorMessage: null,
-        validationResult: [],
-        oldInput: {
-            email: '',
-            password: '',
-            confirmPassword: ''
-        },
-        validationErrors: []
-    })
+    res.status(200)
+        .render('auth/signup', {
+            pageTitle: 'Signup',
+            path: '/signup',
+            errorMessage: null,
+            validationResult: [],
+            oldInput: {
+                email: '',
+                password: '',
+                confirmPassword: ''
+            },
+            validationErrors: []
+        })
 }
 
 exports.postSignup = async (req, res) => {
@@ -146,10 +149,10 @@ exports.postSignup = async (req, res) => {
     })
 }
 
-exports.postLogout = (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/');
-    })
+exports.postLogout = async (req, res) => {
+    await req.session.destroy()
+    res.status(200)
+        .redirect('/')
 }
 
 exports.getReset = (req, res) => {
@@ -163,23 +166,23 @@ exports.getReset = (req, res) => {
 
 exports.postReset = async (req, res) => {
     const email = req.body.email
-    const token = crypto.randomBytes(32)
-        .toString('hex')
-
     const user = await User.findOne({email})
     if (!user) {
-        return res.status(422).render('auth/reset', {
-            path: '/path',
-            pageTitle: 'Reset Password',
-            errorMessage: 'No account with that email found!'
-        })
+        return res.status(422)
+            .render('auth/reset', {
+                path: '/path',
+                pageTitle: 'Reset Password',
+                errorMessage: 'No account with that email found!'
+            })
     }
+    const token = crypto.randomBytes(32)
+        .toString('hex')
 
     user.resetToken = token
     user.resetTokenExpiration = Date.now() + HOUR
     await user.save()
 
-    res.status(200)
+    res.status(201)
         .redirect('/login')
 
     await transporter.sendMail({
@@ -194,8 +197,8 @@ exports.postReset = async (req, res) => {
 }
 
 exports.getNewPassword = async (req, res) => {
-    const token = req.params.token
-    const user = await User.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
+    const resetToken = req.params.token
+    const user = await User.findOne({resetToken, resetTokenExpiration: {$gt: Date.now()}})
     if (!user)
         return throwError404(res)
 
@@ -205,7 +208,7 @@ exports.getNewPassword = async (req, res) => {
             pageTitle: 'New Password',
             errorMessage: null,
             userId: user._id.toString(),
-            passwordToken: token,
+            passwordToken: resetToken,
             validationErrors: [],
             hasError: false
         })
