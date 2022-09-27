@@ -17,7 +17,7 @@ const passwords = {
 }
 
 const carts = {
-    emptyCart: {},
+    emptyCart: {items: []},
     cart1: {items: [{productId: new ObjectId(), quantity: 1}]},
     cart2: {
         items: [

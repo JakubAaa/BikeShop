@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
 const userSchema = new Schema({
     email: {
@@ -29,25 +29,25 @@ const userSchema = new Schema({
 
 userSchema.methods.addToCart = function (product) {
     const cartProductIndex = this.cart.items.findIndex(i => {
-        return i.productId.toString() === product._id.toString();
+        return i.productId.toString() === product._id.toString()
     })
     let newQuantity = 1;
-    const updatedCartItems = [...this.cart.items];
+    const updatedCartItems = [...this.cart.items]
     if (cartProductIndex >= 0) {
-        newQuantity = this.cart.items[cartProductIndex].quantity + 1;
-        updatedCartItems[cartProductIndex].quantity = newQuantity;
+        newQuantity = this.cart.items[cartProductIndex].quantity + 1
+        updatedCartItems[cartProductIndex].quantity = newQuantity
     } else {
         updatedCartItems.push({productId: product._id, quantity: newQuantity})
     }
-    this.cart = {items: updatedCartItems};
-    return this.save();
+    this.cart = {items: updatedCartItems}
+    return this.save()
 }
 
 userSchema.methods.deleteFromCart = function (prodId) {
     this.cart.items = this.cart.items.filter(i => {
-        return i.productId.toString() !== prodId.toString();
+        return i.productId.toString() !== prodId.toString()
     })
-    return this.save();
+    return this.save()
 }
 
 userSchema.methods.clearCart = function () {
@@ -55,4 +55,4 @@ userSchema.methods.clearCart = function () {
     return this.save()
 }
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema)
